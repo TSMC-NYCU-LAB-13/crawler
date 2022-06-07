@@ -2,7 +2,6 @@
 
 # Load Packages
 import os
-import pandas as pd
 from GoogleNews import GoogleNews
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
@@ -50,10 +49,10 @@ def google_news_datetime_calculator(dt_string):
 
 # Search related news by GoogleNews
 news_options = {
-    'lang' = 'zh-TW',
-    'region' = 'TW',
-    'period' = '7d',
-    'encode' = 'utf-8'
+    'lang': 'zh-TW',
+    'region': 'TW',
+    'period': '7d',
+    'encode': 'utf-8'
 }
 googlenews = GoogleNews(**news_options)
 googlenews.search(keyword)
@@ -61,18 +60,21 @@ print('[NeCrawler/SUCCESS]: Search Google news')
 
 # Prepare google news results
 news_ne = []
+news_links = []
 for i in range(1, result_pages + 1):
     page_news = googlenews.page_at(i)
     # filter YouTube because no content
     page_news_without_youtube = list(filter(lambda pn: pn['media'] != 'YouTube', page_news))
     for pnwy in page_news_without_youtube:
-        news_ne.append({
-            'title': pnwy['title'],
-            'url': pnwy['link'],
-            'time': google_news_datetime_calculator(pnwy['date']),
-            'keyword': keyword,
-            'content': '',
-        })
+        if pnwy['link'] not in news_links:
+            news_ne.append({
+                'title': pnwy['title'],
+                'url': pnwy['link'],
+                'time': google_news_datetime_calculator(pnwy['date']),
+                'keyword': keyword,
+                'content': '',
+            })
+            news_links.append(pnwy['link'])
 
 # START CRAWL!
 crawler = NeCrawler()
@@ -104,8 +106,12 @@ try:
     for news in news_ne:
         sql_cmd = "INSERT INTO " + db_table + " (title, url, time, keyword, content) values (%s, %s, %s, %s, %s);"
         cmd_val = tuple(i for i in [v for k, v in news.items()])
-        cursor.execute(sql_cmd, cmd_val)
-        connection.commit()
+        try:
+            cursor.execute(sql_cmd, cmd_val)
+            connection.commit()
+            print('[NeCrawler/SUCCESS]: Store crawl data - ' + news['title'])
+        except Error as e:
+            print('[NeCrawler/ERROR]: Insert database error - ' + news['title'], e)
 
 except Error as e:
     print('[NeCrawler/ERROR]: Database connection error', e)
@@ -114,5 +120,5 @@ finally:
     if (connection.is_connected()):
         cursor.close()
         connection.close()
-        print('[NeCrawler/SUCCESS]: Store crawl data')
+        print('[NeCrawler/FINISH]: Store crawl data')
 
