@@ -8,6 +8,8 @@ python crawler.py
 
 # test
 python -m unittest -v test_crawler.py
+# test per function
+python -m unittest -v test_crawler.TestCrawler.test_html_getText
 ```
 
 ## Build environment
