@@ -1,0 +1,50 @@
+# Build and deploy by quay.io
+# 反正沒經過測試的程式也不會進 master or main branch
+# https://quay.io/repository/tsmc-nycu-lab-13/crawler?tab=builds
+
+# name: Deploy
+# on:
+#   workflow_run:
+#     workflows: 
+#       - Build
+#     branches: main
+#     types: 
+#       - completed
+# jobs:
+#   shortsha:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - id: shortsha
+#         run: echo "::set-output name=shortsha::$(git rev-parse --short HEAD)"
+#     outputs:
+#       shortsha: ${{steps.shortsha.outputs.shortsha}}
+
+#   pushImage:
+#     name: PushImageToQUAY
+#     runs-on: ubuntu-latest
+#     needs: shortsha
+#     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+#     steps:
+#     - uses: actions/checkout@v3
+#     - name: Build Image
+#       id: build-image
+#       uses: redhat-actions/buildah-build@v2
+#       with:
+#         image: crawler
+#         # tags: latest ${{ github.sha }}
+#         tags: latest ${{ needs.shortsha.outputs.shortsha }}
+#         containerfiles: Dockerfile
+#         build-args: |
+#           VUE_APP_BASEURL=${{ secrets.VUE_APP_BASEURL }}
+#     - name: Push To quay.io
+#       id: push-to-quay
+#       uses: redhat-actions/push-to-registry@v2
+#       with:
+#         image: ${{ steps.build-image.outputs.image }}
+#         tags: ${{ steps.build-image.outputs.tags }}
+#         registry: quay.io/tsmc-nycu-lab-13
+#         username: tsmc-nycu-lab-13+quay
+#         password: ${{ secrets.REGISTRY_PASSWORD }}
+#     - name: Print image url
+#       run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"

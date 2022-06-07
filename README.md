@@ -1,4 +1,18 @@
 # Crawler
+
+[![Build Workflow](https://github.com/TSMC-NYCU-LAB-13/crawler/actions/workflows/build.yml/badge.svg?event=push)](https://github.com/TSMC-NYCU-LAB-13/crawler/actions/workflows/build.yml)
+[![Docker Repository on Quay](https://quay.io/repository/tsmc-nycu-lab-13/crawler/status "Docker Repository on Quay")](https://quay.io/repository/tsmc-nycu-lab-13/crawler)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=TSMC-NYCU-LAB-13_crawler&metric=bugs)](https://sonarcloud.io/summary/new_code?id=TSMC-NYCU-LAB-13_crawler)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=TSMC-NYCU-LAB-13_crawler&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=TSMC-NYCU-LAB-13_crawler)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=TSMC-NYCU-LAB-13_crawler&metric=coverage)](https://sonarcloud.io/summary/new_code?id=TSMC-NYCU-LAB-13_crawler)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=TSMC-NYCU-LAB-13_crawler&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=TSMC-NYCU-LAB-13_crawler)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=TSMC-NYCU-LAB-13_crawler&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=TSMC-NYCU-LAB-13_crawler)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=TSMC-NYCU-LAB-13_crawler&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=TSMC-NYCU-LAB-13_crawler)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=TSMC-NYCU-LAB-13_crawler&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=TSMC-NYCU-LAB-13_crawler)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=TSMC-NYCU-LAB-13_crawler&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=TSMC-NYCU-LAB-13_crawler)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=TSMC-NYCU-LAB-13_crawler&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=TSMC-NYCU-LAB-13_crawler)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=TSMC-NYCU-LAB-13_crawler&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=TSMC-NYCU-LAB-13_crawler)
+
 > Google news crawler (last-7-day news) on keyword, 氖氣
 
 ## Main function
