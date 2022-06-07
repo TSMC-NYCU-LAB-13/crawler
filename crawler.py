@@ -12,15 +12,10 @@ import mysql.connector
 from mysql.connector import Error
 import pytz
 
-# Variables (const)
-tz_taipei = pytz.timezone('Asia/Taipei')
-keyword = '氖氣'
-result_pages = 10
-
 # Class: NeCrawler
 class NeCrawler():
     def __init__(self):
-        self.url = 'https://www.google.com/search?q='
+        self.result_pages = 10
 
     def get_source(self, url):
         try:
@@ -37,88 +32,101 @@ class NeCrawler():
     def html_getText(self, soup):
         text_of_p_tag = ''
         for el in soup.find_all('p'):
-            text_of_p_tag += ''.join(el.find_all(text=True))
+            text_of_p_tag += ''.join(el.find_all(string=True))
         return text_of_p_tag
 
-def google_news_datetime_calculator(dt_string):
-    # Calculate news date based on '? 天前'
-    dt_now = datetime.now(tz_taipei)
-    if "天" in dt_string:
-        dt_now -= timedelta(days=int(dt_string.split()[0]))
-    return dt_now.strftime('%Y-%m-%d')
+    def google_news_datetime_calculator(self, dt_now, dt_delta_string):
+        # Calculate news date based on '? 天前'
+        if "天" in dt_delta_string:
+            dt_now -= timedelta(days=int(dt_delta_string.split()[0]))
+        return dt_now.strftime('%Y-%m-%d')
 
-# Search related news by GoogleNews
-news_options = {
-    'lang': 'zh-TW',
-    'region': 'TW',
-    'period': '7d',
-    'encode': 'utf-8'
-}
-googlenews = GoogleNews(**news_options)
-googlenews.search(keyword)
-print('[NeCrawler/SUCCESS]: Search Google news')
+    def prepare_google_news_result(self, keyword, googlenews):
+        news_ne = []
+        news_links = []
+        tz_taipei = pytz.timezone('Asia/Taipei')
+        dt_now = datetime.now(tz_taipei)
+        for i in range(1, self.result_pages + 1):
+            page_news = googlenews.page_at(i)
+            # filter YouTube because no content
+            page_news_without_youtube = list(filter(lambda pn: pn['media'] != 'YouTube', page_news))
+            for pnwy in page_news_without_youtube:
+                if pnwy['link'] not in news_links:
+                    news_ne.append({
+                        'title': pnwy['title'],
+                        'url': pnwy['link'],
+                        'time': self.google_news_datetime_calculator(dt_now, pnwy['date']),
+                        'keyword': keyword,
+                        'content': '',
+                    })
+                    # prepare to compare if links duplicate
+                    news_links.append(pnwy['link'])
+        return news_ne
 
-# Prepare google news results
-news_ne = []
-news_links = []
-for i in range(1, result_pages + 1):
-    page_news = googlenews.page_at(i)
-    # filter YouTube because no content
-    page_news_without_youtube = list(filter(lambda pn: pn['media'] != 'YouTube', page_news))
-    for pnwy in page_news_without_youtube:
-        if pnwy['link'] not in news_links:
-            news_ne.append({
-                'title': pnwy['title'],
-                'url': pnwy['link'],
-                'time': google_news_datetime_calculator(pnwy['date']),
-                'keyword': keyword,
-                'content': '',
-            })
-            news_links.append(pnwy['link'])
-
-# START CRAWL!
-crawler = NeCrawler()
-for item in news_ne:
-    response = crawler.get_source(item['url'])
-    soup = crawler.html_parser(response.text)
-    content = crawler.html_getText(soup)
-    item['content'] = content.strip()
-    sleep(1)
-
-print('[NeCrawler/SUCCESS]: Crawl contents')
-
-# Init DB
-load_dotenv(override = True)
-db_options = {
-    'host': os.getenv('DB_HOST'),
-    'port': os.getenv('DB_PORT'),
-    'database': os.getenv('DB_DATABASE'),
-    'user': os.getenv('DB_USERNAME'),
-    'password': os.getenv('DB_PASSWORD'),
-}
-db_table = os.getenv('DB_TABLE')
-
-# Store crawled data to DB
-try:
-    connection = mysql.connector.connect(**db_options)
-    cursor = connection.cursor()
-
-    for news in news_ne:
-        sql_cmd = "INSERT INTO " + db_table + " (title, url, time, keyword, content) values (%s, %s, %s, %s, %s);"
-        cmd_val = tuple(i for i in [v for k, v in news.items()])
+    def write_crawled_data_to_db(self, news_ne, db_options, db_table):
         try:
-            cursor.execute(sql_cmd, cmd_val)
-            connection.commit()
-            print('[NeCrawler/SUCCESS]: Store crawl data - ' + news['title'])
+            connection = mysql.connector.connect(**db_options)
+            cursor = connection.cursor()
+
+            for news in news_ne:
+                sql_cmd = "INSERT INTO " + db_table + " (title, url, time, keyword, content) values (%s, %s, %s, %s, %s);"
+                cmd_val = tuple(i for i in [v for k, v in news.items()])
+                try:
+                    cursor.execute(sql_cmd, cmd_val)
+                    connection.commit()
+                    print('[NeCrawler/SUCCESS]: Store crawl data - ' + news['title'])
+                except Error as e:
+                    print('[NeCrawler/ERROR]: Insert database error - ' + news['title'], e)
+
         except Error as e:
-            print('[NeCrawler/ERROR]: Insert database error - ' + news['title'], e)
+            print('[NeCrawler/ERROR]: Database connection error', e)
 
-except Error as e:
-    print('[NeCrawler/ERROR]: Database connection error', e)
+        finally:
+            if (connection.is_connected()):
+                cursor.close()
+                connection.close()
+                print('[NeCrawler/FINISH]: Store crawl data')
 
-finally:
-    if (connection.is_connected()):
-        cursor.close()
-        connection.close()
-        print('[NeCrawler/FINISH]: Store crawl data')
 
+
+if __name__ == "__main__":
+    # Init NeCrawler
+    ne_crawler = NeCrawler()
+
+    # Search related news by GoogleNews
+    keyword = '氖氣'
+    news_options = {
+        'lang': 'zh-TW',
+        'region': 'TW',
+        'period': '1d',
+        'encode': 'utf-8'
+    }
+    googlenews = GoogleNews(**news_options)
+    googlenews.search(keyword)
+    print('[NeCrawler/SUCCESS]: Search Google news')
+
+    # Prepare google news results
+    news_ne = ne_crawler.prepare_google_news_result(keyword, googlenews)
+
+    # START CRAWL!
+    for item in news_ne:
+        response = ne_crawler.get_source(item['url'])
+        soup = ne_crawler.html_parser(response.text)
+        content = ne_crawler.html_getText(soup)
+        item['content'] = content.strip()
+        sleep(1)
+    print('[NeCrawler/SUCCESS]: Crawl contents')
+
+    # Setup DB
+    load_dotenv(override = True)
+    db_options = {
+        'host': os.getenv('DB_HOST'),
+        'port': os.getenv('DB_PORT'),
+        'database': os.getenv('DB_DATABASE'),
+        'user': os.getenv('DB_USERNAME'),
+        'password': os.getenv('DB_PASSWORD'),
+    }
+    db_table = os.getenv('DB_TABLE')
+
+    # Store crawled data to DB
+    ne_crawler.write_crawled_data_to_db(news_ne, db_options, db_table)
