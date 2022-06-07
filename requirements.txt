@@ -1,0 +1,5 @@
+GoogleNews
+beautifulsoup4
+mysql-connector-python
+python-dotenv
+requests-html
