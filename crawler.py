@@ -49,7 +49,8 @@ class NeCrawler():
         for i in range(1, self.result_pages + 1):
             page_news = googlenews.page_at(i)
             # filter YouTube because no content
-            page_news_without_youtube = list(filter(lambda pn: pn['media'] != 'YouTube', page_news))
+            if len(page_news) > 0:
+                page_news_without_youtube = list(filter(lambda pn: pn['media'] != 'YouTube', page_news))
             for pnwy in page_news_without_youtube:
                 if pnwy['link'] not in news_links:
                     news_ne.append({
@@ -74,9 +75,9 @@ class NeCrawler():
                 try:
                     cursor.execute(sql_cmd, cmd_val)
                     connection.commit()
-                    print('[NeCrawler/SUCCESS]: Store crawl data - ' + news['title'])
+                    print('[NeCrawler/SUCCESS]: Store crawl data - ', news['time'], news['title'])
                 except Error as e:
-                    print('[NeCrawler/ERROR]: Insert database error - ' + news['title'], e)
+                    print('[NeCrawler/ERROR]: Insert database error - ', news['time'], news['title'], e)
 
         except Error as e:
             print('[NeCrawler/ERROR]: Database connection error', e)
@@ -87,6 +88,13 @@ class NeCrawler():
                 connection.close()
                 print('[NeCrawler/FINISH]: Store crawl data')
 
+def gen_end_date_based_on_start_date_for_google_news(start_date):
+    period_day = 7
+    date_format = '%m/%d/%Y'
+    datetime_start = datetime.strptime(start_date, date_format)
+    datetime_delta = timedelta(days = (period_day - 1))
+    datetime_end = datetime_start - datetime_delta
+    return datetime_end.strftime(date_format)
 
 
 if __name__ == "__main__":
@@ -96,13 +104,23 @@ if __name__ == "__main__":
     ne_crawler = NeCrawler()
 
     # Search related news by GoogleNews
-    keyword = os.getenv('KEYWORD')
-    news_options = {
-        'lang': 'zh-TW',
-        'region': 'TW',
-        'period': '7d',
-        'encode': 'utf-8'
-    }
+    start_date = os.getenv('NEWS_START_DATE')
+    if start_date != '':
+        news_options = {
+            'lang': 'zh-TW',
+            'region': 'TW',
+            'start': start_date,
+            'end': gen_end_date_based_on_start_date_for_google_news(start_date),
+            'encode': 'utf-8'
+        }
+    else:
+        news_options = {
+            'lang': 'zh-TW',
+            'region': 'TW',
+            'period': '7d',
+            'encode': 'utf-8'
+        }
+    keyword = os.getenv('NEWS_KEYWORD')
     googlenews = GoogleNews(**news_options)
     googlenews.search(keyword)
     print('[NeCrawler/SUCCESS]: Search Google news')
