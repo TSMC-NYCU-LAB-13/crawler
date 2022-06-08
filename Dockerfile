@@ -3,4 +3,5 @@ COPY . /crawler
 WORKDIR /crawler
 RUN pip install -r ./requirements.txt
 RUN apt-get update && apt-get install -y ca-certificates --no-install-recommends && rm -rf /var/lib/apt/lists/*
+RUN update-ca-certificates
 CMD [ "python", "/crawler/crawler.py" ]
