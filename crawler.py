@@ -98,7 +98,7 @@ if __name__ == "__main__":
     news_options = {
         'lang': 'zh-TW',
         'region': 'TW',
-        'period': '1d',
+        'period': '7d',
         'encode': 'utf-8'
     }
     googlenews = GoogleNews(**news_options)
