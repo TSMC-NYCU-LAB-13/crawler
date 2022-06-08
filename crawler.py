@@ -51,17 +51,17 @@ class NeCrawler():
             # filter YouTube because no content
             if len(page_news) > 0:
                 page_news_without_youtube = list(filter(lambda pn: pn['media'] != 'YouTube', page_news))
-            for pnwy in page_news_without_youtube:
-                if pnwy['link'] not in news_links:
-                    news_ne.append({
-                        'title': pnwy['title'],
-                        'url': pnwy['link'],
-                        'time': self.google_news_datetime_calculator(dt_now, pnwy['date']),
-                        'keyword': keyword,
-                        'content': '',
-                    })
-                    # prepare to compare if links duplicate
-                    news_links.append(pnwy['link'])
+                for pnwy in page_news_without_youtube:
+                    if pnwy['link'] not in news_links:
+                        news_ne.append({
+                            'title': pnwy['title'],
+                            'url': pnwy['link'],
+                            'time': self.google_news_datetime_calculator(dt_now, pnwy['date']),
+                            'keyword': keyword,
+                            'content': '',
+                        })
+                        # prepare to compare if links duplicate
+                        news_links.append(pnwy['link'])
         return news_ne
 
     def write_crawled_data_to_db(self, news_ne, db_options, db_table):
