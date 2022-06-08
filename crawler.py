@@ -93,7 +93,7 @@ def gen_end_date_based_on_start_date_for_google_news(start_date):
     date_format = '%m/%d/%Y'
     datetime_start = datetime.strptime(start_date, date_format)
     datetime_delta = timedelta(days = (period_day - 1))
-    datetime_end = datetime_start - datetime_delta
+    datetime_end = datetime_start + datetime_delta
     return datetime_end.strftime(date_format)
 
 
