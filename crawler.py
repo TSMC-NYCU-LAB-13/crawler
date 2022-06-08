@@ -90,11 +90,13 @@ class NeCrawler():
 
 
 if __name__ == "__main__":
+    load_dotenv(override = True)
+
     # Init NeCrawler
     ne_crawler = NeCrawler()
 
     # Search related news by GoogleNews
-    keyword = '氖氣'
+    keyword = os.getenv('KEYWORD')
     news_options = {
         'lang': 'zh-TW',
         'region': 'TW',
@@ -118,7 +120,6 @@ if __name__ == "__main__":
     print('[NeCrawler/SUCCESS]: Crawl contents')
 
     # Setup DB
-    load_dotenv(override = True)
     db_options = {
         'host': os.getenv('DB_HOST'),
         'port': os.getenv('DB_PORT'),
