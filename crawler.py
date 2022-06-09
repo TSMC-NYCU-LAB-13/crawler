@@ -21,6 +21,7 @@ class NeCrawler():
         try:
             session = HTMLSession()
             response = session.get(url)
+            session.close()
             return response
         except requests.exceptions.RequestException as e:
             print(e)
@@ -29,7 +30,7 @@ class NeCrawler():
         soup = BeautifulSoup(htmlText, 'html.parser')
         return soup
 
-    def html_getText(self, soup):
+    def html_get_text(self, soup):
         text_of_p_tag = ''
         for el in soup.find_all('p'):
             text_of_p_tag += ''.join(el.find_all(string=True))
@@ -41,13 +42,14 @@ class NeCrawler():
             dt_now -= timedelta(days=int(dt_delta_string.split()[0]))
         return dt_now.strftime('%Y-%m-%d')
 
-    def prepare_google_news_result(self, keyword, googlenews):
+    def prepare_google_news_result(self, keyword, googlenews=None, page_news=None):
         news_ne = []
         news_links = []
         tz_taipei = pytz.timezone('Asia/Taipei')
         dt_now = datetime.now(tz_taipei)
         for i in range(1, self.result_pages + 1):
-            page_news = googlenews.page_at(i)
+            if googlenews is not None:
+                page_news = googlenews.page_at(i)
             # filter YouTube because no content
             if len(page_news) > 0:
                 page_news_without_youtube = list(filter(lambda pn: pn['media'] != 'YouTube', page_news))
@@ -64,18 +66,27 @@ class NeCrawler():
                         news_links.append(pnwy['link'])
         return news_ne
 
-    def write_crawled_data_to_db(self, news_ne, db_options, db_table):
+    def db_connect(self, db_options):
         try:
-            connection = mysql.connector.connect(**db_options)
-            cursor = connection.cursor()
+            return mysql.connector.connect(**db_options)
+        except Error as e:
+            print('[NeCrawler/ERROR]: Database connection error', e)
 
+    def db_disconnect(self, connection):
+        if (connection.is_connected()):
+            connection.close()
+        return connection
+
+    def write_crawled_data_to_db(self, connection, news_ne, db_table):
+        try:
+            cursor = connection.cursor()
             for news in news_ne:
                 sql_cmd = "INSERT INTO " + db_table + " (title, url, time, keyword, content) values (%s, %s, %s, %s, %s);"
                 cmd_val = tuple(i for i in [v for k, v in news.items()])
                 try:
                     cursor.execute(sql_cmd, cmd_val)
                     connection.commit()
-                    print('[NeCrawler/SUCCESS]: Store crawl data - ', news['time'], news['title'])
+                    # print('[NeCrawler/SUCCESS]: Store crawl data - ', news['time'], news['title'])
                 except Error as e:
                     print('[NeCrawler/ERROR]: Insert database error - ', news['time'], news['title'], e)
 
@@ -85,8 +96,7 @@ class NeCrawler():
         finally:
             if (connection.is_connected()):
                 cursor.close()
-                connection.close()
-                print('[NeCrawler/FINISH]: Store crawl data')
+                # print('[NeCrawler/FINISH]: Store crawl data')
 
 def gen_end_date_based_on_start_date_for_google_news(start_date):
     period_day = 7
@@ -132,7 +142,7 @@ if __name__ == "__main__":
     for item in news_ne:
         response = ne_crawler.get_source(item['url'])
         soup = ne_crawler.html_parser(response.text)
-        content = ne_crawler.html_getText(soup)
+        content = ne_crawler.html_get_text(soup)
         item['content'] = content.strip()
         sleep(1)
     print('[NeCrawler/SUCCESS]: Crawl contents')
@@ -147,5 +157,10 @@ if __name__ == "__main__":
     }
     db_table = os.getenv('DB_TABLE')
 
+    db_connection = ne_crawler.db_connect(db_options)
+
     # Store crawled data to DB
-    ne_crawler.write_crawled_data_to_db(news_ne, db_options, db_table)
+    ne_crawler.write_crawled_data_to_db(db_connection, news_ne, db_table)
+    print('[NeCrawler/SUCCESS]: Store crawl data - ', len(news_ne))
+
+    ne_crawler.db_disconnect(db_connection)
