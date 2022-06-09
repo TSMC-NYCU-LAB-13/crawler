@@ -26,6 +26,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Shutdown Ubuntu MySQL (SUDO)
+        run: sudo service mysql stop
+
       - uses: getong/mariadb-action@v1.1
         with:
           mariadb version: '10.4.10'
@@ -35,7 +38,8 @@ jobs:
       - run: |
           sudo apt-get update
           sudo apt-get -yy install gcc libmariadb3 libmariadb-dev
-          mysql -u root -p ${{ secrets.RootPassword }} -h 127.0.0.1 <<MYSQL_SCRIPT
+          mysql -u root -h 127.0.0.1 <<MYSQL_SCRIPT
+          SET PASSWORD = '${{ secrets.RootPassword }}';
           USE crawler;
           SET NAMES utf8;
           SET time_zone = '+00:00';
