@@ -16,27 +16,41 @@ env:
   DB_DATABASE: crawler
   DB_TABLE: articles
   DB_USERNAME: root
-  DB_PASSWORD: ${{ secrets.RootPassword }}
+  DB_PASSWORD: root
 
 jobs:
 
   build:
     name: Build
     runs-on: ubuntu-latest
+    # services:
+    #   mariadb:
+    #     image: mariadb:10.4
+    #     ports:
+    #       - 3306
+    #     env:
+    #       MYSQL_DATABASE: crawler
+    #       MYSQL_ROOT_PASSWORD: ${{ secrets.RootPassword }}
+    #     options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=10s --health-retries=10
     steps:
       - uses: actions/checkout@v3
 
-      - uses: getong/mariadb-action@v1.1
-        with:
-          mariadb version: '10.4.10'
-          mysql database: 'crawler'
-          mysql user: 'crawler'
-          mysql password: ${{ secrets.DatabasePassword }} 
+      # - id: setup-mysql
+      #   uses: shogo82148/actions-setup-mysql@v1
+      #   with:
+      #     distribution: 'mariadb'
+      #     mysql-version: '10.4'
+      #     root-password: ${{ secrets.RootPassword }}
 
       - run: |
           sudo apt-get update
-          sudo apt-get -yy install gcc libmariadb3 libmariadb-dev
-          mysql -u crawler -p ${{ secrets.DatabasePassword }} -h 127.0.0.1 <<MYSQL_SCRIPT
+          sudo apt-get -y install gcc libmariadb3 libmariadb-dev
+          sudo /lib/systemd/systemd-sysv-install enable mysql
+          sudo systemctl enable mysql.service
+          sudo systemctl start mysql.service
+          sleep 60
+          mysql -u root -p root <<MYSQL_SCRIPT
+          CREATE DATABASE crawler;
           USE crawler;
           SET NAMES utf8;
           SET time_zone = '+00:00';
