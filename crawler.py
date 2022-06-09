@@ -11,6 +11,12 @@ from time import sleep
 import mysql.connector
 from mysql.connector import Error
 import pytz
+import requests
+import ssl
+from urllib3.exceptions import InsecureRequestWarning
+
+ssl.SSLContext.verify_mode = property(lambda self: ssl.CERT_NONE, lambda self, newval: None)
+requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 # Class: NeCrawler
 class NeCrawler():
