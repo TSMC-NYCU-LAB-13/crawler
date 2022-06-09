@@ -6,6 +6,17 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+env:
+  APP_URL: 127.0.0.1
+  APP_PORT: 8000
+  APP_DEBUG: True
+  DB_CONNECTION: mariadb
+  DB_HOST: 127.0.0.1
+  DB_PORT: 3306
+  DB_DATABASE: fastapi
+  DB_USERNAME: root
+  DB_PASSWORD: ${{ secrets.RootPassword }}
+
 jobs:
 
   build:
@@ -13,6 +24,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - uses: getong/mariadb-action@v1.1
+        with:
+          mariadb version: '10.4.10'
+          mysql database: 'fastapi_test'
+          mysql root password: ${{ secrets.RootPassword }}
+
+      - run: |
+          sudo apt-get update
+          sudo apt-get -yy install gcc libmariadb3 libmariadb-dev
 
       - uses: actions/setup-python@v2
         with:
