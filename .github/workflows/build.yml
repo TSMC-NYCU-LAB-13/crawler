@@ -35,7 +35,7 @@ jobs:
       - run: |
           sudo apt-get update
           sudo apt-get -yy install gcc libmariadb3 libmariadb-dev
-          mysql -u root -p<<MYSQL_SCRIPT
+          mysql -u root -p ${{ secrets.RootPassword }} <<MYSQL_SCRIPT
           USE crawler;
           SET NAMES utf8;
           SET time_zone = '+00:00';
