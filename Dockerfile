@@ -1,4 +1,5 @@
-FROM python:3.10-slim
+# TLS 1.3 force - https://stackoverflow.com/a/66936856
+FROM python:3.9-alpine
 COPY . /crawler
 WORKDIR /crawler
 RUN pip install -r ./requirements.txt

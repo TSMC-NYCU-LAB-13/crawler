@@ -30,7 +30,7 @@ class NeCrawler():
             response = session.get(url, verify=False)
             session.close()
             return response
-        except requests.exceptions.RequestException as e:
+        except (requests.exceptions.RequestException) as e:
             print(e)
 
     def html_parser(self, htmlText):
