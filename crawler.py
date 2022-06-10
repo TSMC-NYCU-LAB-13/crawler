@@ -15,8 +15,8 @@ import requests
 import ssl
 from urllib3.exceptions import InsecureRequestWarning
 
-ssl.SSLContext.check_hostname = False
-ssl.SSLContext.verify_mode = property(lambda self: ssl.CERT_NONE, lambda self, newval: None)
+# ssl.SSLContext.check_hostname = False
+# ssl.SSLContext.verify_mode = property(lambda self: ssl.CERT_NONE, lambda self, newval: None)
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 # Class: NeCrawler
@@ -27,7 +27,7 @@ class NeCrawler():
     def get_source(self, url):
         try:
             session = HTMLSession()
-            response = session.get(url)
+            response = session.get(url, verify=False)
             session.close()
             return response
         except requests.exceptions.RequestException as e:
