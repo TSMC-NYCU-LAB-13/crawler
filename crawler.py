@@ -27,10 +27,10 @@ class NeCrawler():
     def get_source(self, url):
         try:
             session = HTMLSession()
-            response = session.get(url, verify=False)
+            response = session.get(url, verify=ssl.CERT_NONE)
             session.close()
             return response
-        except (requests.exceptions.RequestException) as e:
+        except (requests.exceptions.RequestException, requests.exceptions.SSLError) as e:
             print(e)
 
     def html_parser(self, htmlText):
