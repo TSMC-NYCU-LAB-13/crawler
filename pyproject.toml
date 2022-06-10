@@ -6,12 +6,11 @@ authors = ["t106362512 <t106362512@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-goooglenews = "beautifulsoup4"
-beautifulsoup4 = "python-dotenv"
 python-dotenv = "^0.20.0"
-GoogleNews = "^1.6.3"
 requests-html = "^0.10.0"
 mysql-connector-python = "^8.0.29"
+beautifulsoup4 = "^4.11.1"
+GoogleNews = "^1.6.3"
 
 [tool.poetry.dev-dependencies]
 coverage = "^6.4.1"
