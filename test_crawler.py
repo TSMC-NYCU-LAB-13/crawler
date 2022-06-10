@@ -135,7 +135,7 @@ class TestCrawler(unittest.TestCase):
             'password': os.getenv('DB_PASSWORD'),
         })
         cursor = db_connection.cursor()
-        cursor.execute('CREATE TABLE IF NOT EXISTS ' + test_db_table + ' ( `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT, `title` text COLLATE utf8mb4_unicode_ci NOT NULL, `url` text COLLATE utf8mb4_unicode_ci NOT NULL, `time` datetime NOT NULL, `keyword` text COLLATE utf8mb4_unicode_ci NOT NULL, `content` text COLLATE utf8mb4_unicode_ci NOT NULL, `emotional_value` double DEFAULT NULL, `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(), PRIMARY KEY (`id`), UNIQUE KEY `url_unique` (`url`) USING HASH, KEY `keyword_index` (`keyword`(768)) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci')
+        cursor.execute('CREATE TABLE IF NOT EXISTS ' + test_db_table + ' ( `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT, `title` text COLLATE utf8mb4_unicode_ci NOT NULL, `url` text COLLATE utf8mb4_unicode_ci NOT NULL, `time` datetime NOT NULL, `keyword` text COLLATE utf8mb4_unicode_ci NOT NULL, `content` text COLLATE utf8mb4_unicode_ci NOT NULL, `emotional_value` double DEFAULT NULL, `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(), PRIMARY KEY (`id`), UNIQUE KEY `url_unique` (`url`(768)) USING HASH, KEY `keyword_index` (`keyword`(768)) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci')
         crawler.write_crawled_data_to_db(db_connection, test_news, test_db_table)
         cursor.execute('SELECT COUNT(*) FROM ' + test_db_table)
         length_retrive_data = cursor.fetchall()[-1][-1]

@@ -7,9 +7,6 @@ on:
     types: [opened, synchronize, reopened]
 
 env:
-  APP_URL: 127.0.0.1
-  APP_PORT: 8000
-  APP_DEBUG: True
   DB_CONNECTION: mariadb
   DB_HOST: 127.0.0.1
   DB_PORT: 3306
@@ -23,55 +20,39 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    # services:
-    #   mariadb:
-    #     image: mariadb:10.4
-    #     ports:
-    #       - 3306
-    #     env:
-    #       MYSQL_DATABASE: crawler
-    #       MYSQL_ROOT_PASSWORD: ${{ secrets.RootPassword }}
-    #     options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=10s --health-retries=10
     steps:
       - uses: actions/checkout@v3
-
-      # - id: setup-mysql
-      #   uses: shogo82148/actions-setup-mysql@v1
-      #   with:
-      #     distribution: 'mariadb'
-      #     mysql-version: '10.4'
-      #     root-password: ${{ secrets.RootPassword }}
 
       - run: |
           sudo apt-get update
           sudo apt-get -y install gcc libmariadb3 libmariadb-dev
-          sudo /lib/systemd/systemd-sysv-install enable mysql
-          sudo systemctl enable mysql.service
-          sudo systemctl start mysql.service
-          sleep 60
-          mysql -u root -p root <<MYSQL_SCRIPT
+          sudo systemctl start mysql
+          mysql -e "SHOW DATABASES;" -uroot -proot
+
+      - run: |
+          mysql -uroot -proot <<MYSQL_SCRIPT
           CREATE DATABASE crawler;
-          USE crawler;
-          SET NAMES utf8;
-          SET time_zone = '+00:00';
-          SET foreign_key_checks = 0;
-          SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
-          SET NAMES utf8mb4;
-          DROP TABLE IF EXISTS \`articles\`;
-          CREATE TABLE \`articles\` (
-            \`id\` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            \`title\` text COLLATE utf8mb4_unicode_ci NOT NULL,
-            \`url\` text COLLATE utf8mb4_unicode_ci NOT NULL,
-            \`time\` datetime NOT NULL,
-            \`keyword\` text COLLATE utf8mb4_unicode_ci NOT NULL,
-            \`content\` text COLLATE utf8mb4_unicode_ci NOT NULL,
-            \`emotional_value\` double DEFAULT NULL,
-            \`created_at\` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-            PRIMARY KEY (\`id\`),
-            UNIQUE KEY \`url_unique\` (\`url\`) USING HASH,
-            KEY \`keyword_index\` (\`keyword\`(768))
-          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
           MYSQL_SCRIPT
+          # USE crawler;
+          # SET NAMES utf8;
+          # SET time_zone = '+00:00';
+          # SET foreign_key_checks = 0;
+          # SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
+          # SET NAMES utf8mb4;
+          # DROP TABLE IF EXISTS \`articles\`;
+          # CREATE TABLE \`articles\` (
+          #   \`id\` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+          #   \`title\` text COLLATE utf8mb4_unicode_ci NOT NULL,
+          #   \`url\` text COLLATE utf8mb4_unicode_ci NOT NULL,
+          #   \`time\` datetime NOT NULL,
+          #   \`keyword\` text COLLATE utf8mb4_unicode_ci NOT NULL,
+          #   \`content\` text COLLATE utf8mb4_unicode_ci NOT NULL,
+          #   \`emotional_value\` double DEFAULT NULL,
+          #   \`created_at\` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+          #   PRIMARY KEY (\`id\`),
+          #   UNIQUE KEY \`url_unique\` (\`url\`(768)) USING HASH,
+          #   KEY \`keyword_index\` (\`keyword\`(768))
+          # ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
       - uses: actions/setup-python@v2
         with:
