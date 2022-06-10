@@ -22,6 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+            fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
       - run: |
           sudo apt-get update
@@ -62,25 +64,14 @@ jobs:
         with:
           poetry-version: 1.1.13
       - run: poetry install
-      # - run: pip install pylint coverage
-      - run: poetry run coverage run -m unittest discover
+      - run: poetry run coverage run -m xmlrunner discover --output-file xunit-result.xml
       - run: poetry run coverage report
-      - run: poetry run coverage html
       - run: poetry run coverage xml
-      - run: poetry run python -m xmlrunner --output-file xunit-result.xml
+      - run: poetry run coverage html
       - uses: actions/upload-artifact@v2
         with:
           name: code-coverage
           path: htmlcov
-
-  sonarcloud:
-    name: SonarCloud
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
