@@ -30,7 +30,9 @@ class NeCrawler():
             response = session.get(url, verify=ssl.CERT_NONE)
             session.close()
             return response
-        except (requests.exceptions.RequestException, requests.exceptions.SSLError, requests.exceptions.RetryError) as e:
+        # except (requests.exceptions.RequestException, requests.exceptions.SSLError, requests.exceptions.RetryError) as e:
+        #     print(e)
+        except Exception as e:
             print(e)
 
     def html_parser(self, htmlText):
@@ -147,11 +149,14 @@ if __name__ == "__main__":
 
     # START CRAWL!
     for item in news_ne:
-        response = ne_crawler.get_source(item['url'])
-        soup = ne_crawler.html_parser(response.text)
-        content = ne_crawler.html_get_text(soup)
-        item['content'] = content.strip()
-        sleep(1)
+        try:
+            response = ne_crawler.get_source(item['url'])
+            soup = ne_crawler.html_parser(response.text)
+            content = ne_crawler.html_get_text(soup)
+            item['content'] = content.strip()
+            sleep(1)
+        except (requests.exceptions.RequestException, requests.exceptions.SSLError, requests.exceptions.RetryError) as e:
+            print(e)
     print('[NeCrawler/SUCCESS]: Crawl contents')
 
     # Setup DB
