@@ -155,7 +155,7 @@ if __name__ == "__main__":
             content = ne_crawler.html_get_text(soup)
             item['content'] = content.strip()
             sleep(1)
-        except (requests.exceptions.RequestException, requests.exceptions.SSLError, requests.exceptions.RetryError) as e:
+        except Exception as e:
             print(e)
     print('[NeCrawler/SUCCESS]: Crawl contents')
 
