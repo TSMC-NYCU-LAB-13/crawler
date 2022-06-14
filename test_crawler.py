@@ -7,17 +7,17 @@ from crawler import NeCrawler, gen_end_date_based_on_start_date_for_google_news
 
 load_dotenv(override = True)
 
+target_url = 'https://www.bbc.co.uk/sport/tennis/61693135'
+
 class TestCrawler(unittest.TestCase):
 
     def test_get_source(self):
         crawler = NeCrawler()
-        target_url = 'https://www.bbc.co.uk/sport/tennis/61693135'
         response = crawler.get_source(target_url)
         self.assertTrue(response.status_code == 200)
 
     def test_html_parser(self):
         crawler = NeCrawler()
-        target_url = 'https://www.bbc.co.uk/sport/tennis/61693135'
         response = crawler.get_source(target_url)
         soup = crawler.html_parser(response.text)
         results = soup.findAll("div")
@@ -25,7 +25,6 @@ class TestCrawler(unittest.TestCase):
 
     def test_html_get_text(self):
         crawler = NeCrawler()
-        target_url = 'https://www.bbc.co.uk/sport/tennis/61693135'
         response = crawler.get_source(target_url)
         soup = crawler.html_parser(response.text)
         orignal_text = crawler.html_get_text(soup)

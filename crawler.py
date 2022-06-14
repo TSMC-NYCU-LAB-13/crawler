@@ -15,8 +15,6 @@ import requests
 import ssl
 from urllib3.exceptions import InsecureRequestWarning
 
-# ssl.SSLContext.check_hostname = False
-# ssl.SSLContext.verify_mode = property(lambda self: ssl.CERT_NONE, lambda self, newval: None)
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 # Class: NeCrawler
@@ -35,8 +33,8 @@ class NeCrawler():
         except Exception as e:
             print(e)
 
-    def html_parser(self, htmlText):
-        soup = BeautifulSoup(htmlText, 'html.parser')
+    def html_parser(self, html_text):
+        soup = BeautifulSoup(html_text, 'html.parser')
         return soup
 
     def html_get_text(self, soup):
