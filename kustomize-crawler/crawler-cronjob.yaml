@@ -4,7 +4,7 @@ metadata:
   name: crawler
   namespace: tsmc-nycu-lab-13
 spec:
-  schedule: "59 23 * * *"
+  schedule: "59 15 * * *"
   suspend: true
   jobTemplate:
     spec:
@@ -15,16 +15,76 @@ spec:
             sidecar.istio.io/inject: "false"
         spec:
           containers:
-          - image: quay.io/tsmc-nycu-lab-13/crawler
-            name: crawler
-            envFrom:
-              - secretRef:
-                  name: crawler-env
-            command:
+          - image: &image quay.io/tsmc-nycu-lab-13/crawler
+            name: crawler-1
+            env:
+              - name: NEWS_KEYWORD
+                value: 氖氣
+              - name: NEWS_START_DATE
+                value: &sd ""
+            command: &cmd
               - "python"
               - "crawler.py"
-            resources:
+            resources: &res
               requests:
-                memory: "128M"
-                cpu: "500m"
+                memory: "64M"
+                cpu: "100m"
+            volumeMounts: &vol
+            - name: env-volume
+              mountPath: /crawler/.env
+              subPath: ".env"
+          - image: *image
+            name: crawler-2
+            env: 
+              - name: NEWS_KEYWORD
+                value: Applied Materials
+              - name: NEWS_START_DATE
+                value: *sd
+            command: *cmd
+            resources: *res
+            volumeMounts: *vol
+          - image: *image
+            name: crawler-3
+            env: 
+              - name: NEWS_KEYWORD
+                value: SUMCO
+              - name: NEWS_START_DATE
+                value: *sd
+            command: *cmd
+            resources: *res
+            volumeMounts: *vol
+          - image: *image
+            name: crawler-4
+            env: 
+              - name: NEWS_KEYWORD
+                value: ASML
+              - name: NEWS_START_DATE
+                value: *sd
+            command: *cmd
+            resources: *res
+            volumeMounts: *vol
+          - image: *image
+            name: crawler-5
+            env: 
+              - name: NEWS_KEYWORD
+                value: TSMC
+              - name: NEWS_START_DATE
+                value: *sd
+            command: *cmd
+            resources: *res
+            volumeMounts: *vol
+          - image: *image
+            name: crawler-6
+            env: 
+              - name: NEWS_KEYWORD
+                value: 台積電
+              - name: NEWS_START_DATE
+                value: *sd
+            command: *cmd
+            resources: *res
+            volumeMounts: *vol
+          volumes:
+            - name: env-volume
+              secret:
+                secretName: crawler-env
           restartPolicy: Never
