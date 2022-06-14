@@ -20,15 +20,15 @@ spec:
             env:
               - name: NEWS_KEYWORD
                 value: 氖氣
-              - name: NEWS_START_DATE
-                value: &sd ""
+              # - name: NEWS_START_DATE
+              #   value: &sd ""
             command: &cmd
               - "python"
               - "crawler.py"
             resources: &res
               requests:
-                memory: "64M"
-                cpu: "100m"
+                memory: "30M"
+                cpu: "50m"
             volumeMounts: &vol
             - name: env-volume
               mountPath: /crawler/.env
@@ -38,8 +38,8 @@ spec:
             env: 
               - name: NEWS_KEYWORD
                 value: Applied Materials
-              - name: NEWS_START_DATE
-                value: *sd
+              # - name: NEWS_START_DATE
+              #   value: *sd
             command: *cmd
             resources: *res
             volumeMounts: *vol
@@ -48,8 +48,8 @@ spec:
             env: 
               - name: NEWS_KEYWORD
                 value: SUMCO
-              - name: NEWS_START_DATE
-                value: *sd
+              # - name: NEWS_START_DATE
+              #   value: *sd
             command: *cmd
             resources: *res
             volumeMounts: *vol
@@ -58,8 +58,8 @@ spec:
             env: 
               - name: NEWS_KEYWORD
                 value: ASML
-              - name: NEWS_START_DATE
-                value: *sd
+              # - name: NEWS_START_DATE
+              #   value: *sd
             command: *cmd
             resources: *res
             volumeMounts: *vol
@@ -68,8 +68,8 @@ spec:
             env: 
               - name: NEWS_KEYWORD
                 value: TSMC
-              - name: NEWS_START_DATE
-                value: *sd
+              # - name: NEWS_START_DATE
+              #   value: *sd
             command: *cmd
             resources: *res
             volumeMounts: *vol
@@ -78,8 +78,8 @@ spec:
             env: 
               - name: NEWS_KEYWORD
                 value: 台積電
-              - name: NEWS_START_DATE
-                value: *sd
+              # - name: NEWS_START_DATE
+              #   value: *sd
             command: *cmd
             resources: *res
             volumeMounts: *vol
@@ -87,4 +87,6 @@ spec:
             - name: env-volume
               secret:
                 secretName: crawler-env
+          nodeSelector:
+            job: "true"
           restartPolicy: Never
