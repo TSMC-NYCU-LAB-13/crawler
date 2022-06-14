@@ -59,7 +59,7 @@ class NeCrawler():
                 page_news = googlenews.page_at(i)
             # filter YouTube because no content
             if len(page_news) > 0:
-                page_news_without_youtube = list(filter(lambda pn: (pn['media'] != 'YouTube' and 'news.sina.com.tw' not in pn['link']), page_news))
+                page_news_without_youtube = list(filter(lambda pn: (pn['media'] != 'YouTube' and 'news.sina.com.tw' not in pn['link'] and 'iviews.sina.com.tw' not in pn['link']), page_news))
                 for pnwy in page_news_without_youtube:
                     if pnwy['link'] not in news_links:
                         news_ne.append({
@@ -155,6 +155,7 @@ if __name__ == "__main__":
             sleep(1)
         except Exception as e:
             print(e)
+            continue
     print('[NeCrawler/SUCCESS]: Crawl contents')
 
     # Setup DB
